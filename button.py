@@ -38,7 +38,7 @@ class Button(Sprite):
         self.rect.center = self.center
 
         # Рисуем текст
-        self.font = pygame.font.Font(None, 28)
+        self.font = pygame.font.Font(None, 24)
         self.text_surface = self.font.render(self.text, True, BACKGROUND_COLOR)
         # Вычисляем позицию для текста
         x = (self.width - self.text_surface.get_width()) // 2
