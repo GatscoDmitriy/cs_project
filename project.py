@@ -2,10 +2,13 @@
 import pygame
 from config import *
 from functions import *
+from pygame.sprite import Group
 from button import Button
+
 pygame.init()
-sc = pygame.display.set_mode((w, h))
-f = pygame.font.SysFont('arial', 18)
+
+screen = pygame.display.set_mode((w, h))
+f = pygame.font.SysFont('arial', 16)
 f1 = pygame.font.SysFont('arial', 30)
 
 color = (red, green, blue)
@@ -13,107 +16,130 @@ red = 0
 green = 0
 blue = 0
 color_ = 8
-clock = pygame.time.Clock()
 color = black
+i = 2
+
+figure_draw_start = (0, 0)
 fl_draw_start = False
 sp = ep = None
 fl_up_i = False
 fl_r = False
 fl_down_i = False
-regym = Brush()
-button1 = Button('Brush',(100, 25))
-button2 = Button('Rubber',(100, 75))
-button3 = Button('RectangleBrush', (100, 125))
-button4 = Button('CircleBrush', (100, 175))
-button_color_red_up = Button('red_up', (45, 320), False, 90, 40)
-button_color_green_up = Button('green_up', (45, 370), False, 90, 40)
-button_color_blue_up = Button('blue_up', (45, 420), False, 90, 40)
-button_color_red_down = Button('red_down', (150, 320), False, 100, 40)
-button_color_green_down = Button('green_down', (150, 370), False, 100, 40)
-button_color_blue_down = Button('blue_down', (150, 420), False, 100, 40)
 
-i = 1
-op = 0
+title_font = pygame.font.SysFont('Arial', 32)
+under_title_font = pygame.font.SysFont('Arial', 24)
+title_surface = title_font.render('Whiteboard', True, 'black')
+under_title_surface = under_title_font.render('1.0', True, 'gray')
+
+regym = Brush()
+
+buttons_group = Group()
+
+def button1_callback():
+    global regym
+    regym = Brush()
+def button2_callback():
+    global regym
+    regym = RubberBrush()
+def button3_callback():
+    global regym
+    regym = RectangleBrush()
+def button4_callback():
+    global regym
+    regym = CircleBrush()
+
+def button_color_red_up_callback():
+    global red, color_
+    red = abs((red + color_) % 256)
+
+def button_color_red_down_callback():
+    global red, color_
+    red = abs((red - color_) % 256)
+
+def button_color_green_up_callback():
+    global green, color_
+    green = abs((green + color_) % 256)
+
+def button_color_green_down_callback():
+    global green, color_
+    green = abs((green - color_) % 256)
+
+def button_color_blue_up_callback():
+    global blue, color_
+    blue = abs((blue + color_) % 256)
+
+def button_color_blue_down_callback():
+    global blue, color_
+    blue = abs((blue - color_) % 256)
+
+def button_size_up_callback():
+    global i
+    if  i < 200:
+        i += 1
+def button_size_down_callabck():
+    global i
+    if i > 2:
+        i -= 1
+
+button1 = Button('Brush',(101, 100), width=180, callback=button1_callback)
+button2 = Button('Rubber',(101, 150), width=180, callback=button2_callback)
+button3 = Button('RectangleBrush', (101, 200), width=180, callback=button3_callback)
+button4 = Button('CircleBrush', (101, 250), width=180, callback=button4_callback)
+buttons_group.add(button1, button2, button3, button4)
+
+button_color_red_up = Button('+red', (49, 320), button_color_red_up_callback, 85, 40)
+button_color_green_up = Button('+green', (49, 370), button_color_green_up_callback, 85, 40)
+button_color_blue_up = Button('+blue', (49, 420), button_color_blue_up_callback, 85, 40)
+button_color_red_down = Button('-red', (150, 320), button_color_red_down_callback, 85, 40)
+button_color_green_down = Button('-green', (150, 370), button_color_green_down_callback, 85, 40)
+button_color_blue_down = Button('-blue', (150, 420), button_color_blue_down_callback, 85, 40)
+buttons_group.add(button_color_red_up, button_color_green_up, button_color_blue_up)
+buttons_group.add(button_color_red_down, button_color_green_down, button_color_blue_down)
+
+button_size_up = Button('+size', (49, 600), button_size_up_callback, 85, 40)
+button_size_down = Button('-size', (150, 600), button_size_down_callabck, 85, 40)
+buttons_group.add(button_size_up, button_size_down)
+
 pygame.mouse.set_visible(False)
-sc.fill(white)
+
+screen.fill(white)
+screen.blit(title_surface, (15, 15))
+screen.blit(under_title_surface, (80, 45))
+pygame.draw.line(screen, black, (200, 0), (200, 720))
+pygame.draw.line(screen, black, (1001,0), (1001, 720))
+help_txt(f, screen)
+
+current_screen = screen.copy()
+
+draw_field = pygame.Surface((800, 720))
+draw_field.fill('white')
+draw_field_rect = pygame.Rect((201, 0), (800, 720))
+
 exit_flag = False
-help_txt(f, sc)
+clock = pygame.time.Clock()
+
+mouse_pos = (400, 400)
+mouse_pos_ = None
+
 while True:
-    mouse_pos = pygame.mouse.get_pos()
-    mouse_pos_ = None
-    button1.update()
-    button1.draw(sc)
-    button2.update()
-    button2.draw(sc)
-    button3.update()
-    button3.draw(sc)
-    button4.update()
-    button4.draw(sc)
-    button_color_red_up.update()
-    button_color_red_up.draw(sc)
-    button_color_green_up.update()
-    button_color_green_up.draw(sc)
-    button_color_blue_up.update()
-    button_color_blue_up.draw(sc)
-    button_color_red_down.update()
-    button_color_red_down.draw(sc)
-    button_color_green_down.update()
-    button_color_green_down.draw(sc)
-    button_color_blue_down.update()
-    button_color_blue_down.draw(sc)
-    pygame.draw.line(sc, black, (200, 0), (200, 720))
-    pygame.draw.line(sc, black, (1000,0), (1000, 720))
-    if button1.callback:
-        regym = Brush()
-        button1.callback = False
-    if button2.callback:
-        regym = RubberBrush()
-        button2.callback = False
-    if button3.callback:
-        regym = RectangleBrush()
-        button3.callback = False
-    if button4.callback:
-        regym = CircleBrush()
-        button4.callback = False
-    if button_color_red_up.callback:
-        if red < 256:
-            red += color_
-            if red >= 256:
-                red = 255
-        button_color_red_up.callback = False
-    if button_color_green_up.callback:
-        if  green < 256:
-            green += color_
-            if green >= 256:
-                green = 255
-        button_color_green_up.callback = False
-    if button_color_blue_up.callback:
-        if blue < 256:
-            blue += color_
-            if blue >= 256:
-                blue = 255
-        button_color_blue_up.callback = False
-    if button_color_red_down.callback:
-        if red == 255:
-            red -= 7
-        elif red != 255:
-            if red > 0:
-                red -= color_
-        button_color_red_down.callback = False
-    if button_color_green_down.callback:
-        if green == 255:
-            green -= 7
-        elif green != 255:
-            if green > 0:
-                green -= color_
-        button_color_green_down.callback = False
-    if button_color_blue_down.callback:
-        if blue == 255:
-            blue -= 7
-        elif blue != 255:
-            if blue > 0:
-                blue -= color_
-        button_color_blue_down.callback = False
+    mouse_pos_ = mouse_pos
+    real_mouse_pos = pygame.mouse.get_pos()
+    mouse_pos = (real_mouse_pos[0] - 201, real_mouse_pos[1])
+
+    screen.blit(current_screen, (0, 0))
+    screen.blit(draw_field, (201, 0))
+
+    buttons_group.update()
+    buttons_group.draw(screen)
+    pygame.draw.rect(screen, color, (10, 450, 180, 100))
+
+    # Рисуем курсор
+    if draw_field_rect.collidepoint(real_mouse_pos):
+        pygame.draw.circle(screen, 'white', real_mouse_pos, radius=i+1)
+        pygame.draw.circle(screen, 'red', real_mouse_pos, radius=i)
+    else:
+        pygame.draw.circle(screen, 'white', real_mouse_pos, radius=6)
+        pygame.draw.circle(screen, 'black', real_mouse_pos, radius=5)
 
     color = (red, green, blue)
 
@@ -122,36 +148,29 @@ while True:
             exit()
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             fl_draw_start = True
+            figure_draw_start = real_mouse_pos
             sp = event.pos
-        elif event.type == pygame.KEYDOWN:
-
-            if event.key == pygame.K_UP:
-                fl_up_i = True
-            if event.key == pygame.K_DOWN:
-                fl_down_i = True
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_UP:
-                fl_up_i = False
-            if event.key == pygame.K_r:
-                fl_r = False
-        if event.type == pygame.K_DOWN:
-            fl_down_i = False
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
             fl_draw_start = False
-    if fl_up_i:
-        if i < 6:
-            i += 0.01
-    elif fl_down_i:
-        if i > 1:
-            i -= 0.01
-    if fl_draw_start:
-        if  1000 > mouse_pos[0] > 200 and mouse_pos[1] > 0:
-            mouse_pos_ = pygame.mouse.get_pos()
-            regym.draw(sc, color, mouse_pos, mouse_pos_, i)
 
-    color_text = f1.render(f'color: ({str(color[0])}, {str(color[1])}, {str(color[2])})', False, black)
-    sc.blit(color_text, (30, 450))
+
+
+
+    if fl_draw_start:
+        if isinstance(regym, (Brush, RubberBrush)):
+            print(mouse_pos, mouse_pos_)
+            regym.draw(draw_field, color, mouse_pos, mouse_pos_, i)
+        if isinstance(regym, (RectangleBrush, CircleBrush)):
+            regym.draw(screen, color, real_mouse_pos, figure_draw_start, i)
+    elif figure_draw_start is not None:
+        if isinstance(regym, (RectangleBrush, CircleBrush)):
+            figure_draw_start = (figure_draw_start[0] - 201, figure_draw_start[1])
+            regym.draw(draw_field, color, mouse_pos, figure_draw_start, i)
+        figure_draw_start = None
+
     pygame.display.update()
     clock.tick(FPS)
+
+
 
 
