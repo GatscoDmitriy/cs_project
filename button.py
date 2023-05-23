@@ -4,7 +4,6 @@ from pygame.sprite import Sprite
 
 from config import *
 
-
 class Button(Sprite):
     width: int
     height: int
@@ -15,7 +14,7 @@ class Button(Sprite):
     text_surface: pygame.Surface
     callback: callable
 
-    def __init__(self, text, center, callback=False, width=200, height=50) -> None:
+    def __init__(self, text, center, callback=None, width=200, height=50) -> None:
         Sprite.__init__(self)
 
         # Инициализируем переменные
@@ -31,7 +30,7 @@ class Button(Sprite):
         self.image.fill(BACKGROUND_COLOR)
 
         # Рисуем прямоугольник
-        pygame.draw.rect(self.image, BUTTON_COLLOR, (0, 0, self.width, self.height), border_radius=16)
+        pygame.draw.rect(self.image, BUTTON_COLLOR, (0, 0, self.width, self.height))
 
         # Выставляем положение кнопки
         self.rect = pygame.Rect(0, 0, self.width, self.height)
@@ -39,7 +38,7 @@ class Button(Sprite):
 
         # Рисуем текст
         self.font = pygame.font.Font(None, 24)
-        self.text_surface = self.font.render(self.text, True, BACKGROUND_COLOR)
+        self.text_surface = self.font.render(self.text, True, 'white')
         # Вычисляем позицию для текста
         x = (self.width - self.text_surface.get_width()) // 2
         y = (self.height - self.text_surface.get_height()) // 2
@@ -52,25 +51,22 @@ class Button(Sprite):
 
         if self.rect.collidepoint(pos) and pressed:
             self.image.fill(BACKGROUND_COLOR)
-            pygame.draw.rect(self.image, HOVERED_BUTTON_COLOR, (3, 2, self.width - 6, self.height - 4),
-                             border_radius=16)
+            pygame.draw.rect(self.image, HOVERED_BUTTON_COLOR, (3, 2, self.width - 6, self.height - 4))
             self.image.blit(self.text_surface, self.text_pos)
             self.pressed = True
         elif self.rect.collidepoint(pos):
             self.image.fill(BACKGROUND_COLOR)
-            pygame.draw.rect(self.image, HOVERED_BUTTON_COLOR, (0, 0, self.width, self.height), border_radius=16)
+            pygame.draw.rect(self.image, HOVERED_BUTTON_COLOR, (0, 0, self.width, self.height))
             self.image.blit(self.text_surface, self.text_pos)
             if self.pressed:
                 if self.callback != None:
-                    self.callback = True
+                    self.callback()
                 self.pressed = False
         else:
             self.image.fill(BACKGROUND_COLOR)
-            pygame.draw.rect(self.image, BUTTON_COLLOR, (0, 0, self.width, self.height), border_radius=16)
+            pygame.draw.rect(self.image, BUTTON_COLLOR, (0, 0, self.width, self.height))
             self.image.blit(self.text_surface, self.text_pos)
             if self.pressed:
-                if self.callback != None:
-                    self.callback = True
                 self.pressed = False
     def draw(self, surface):
         surface.blit(self.image, self.rect)
